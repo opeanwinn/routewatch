@@ -14,6 +14,10 @@ export interface RouteNode {
   isLayout?: boolean;
 }
 
+function typeRank(n: RouteNode): number {
+  return n.isLayout ? 0 : n.isPage ? 1 : 2;
+}
+
 export function sortNodes(nodes: RouteNode[], opts: SortOptions): RouteNode[] {
   const sorted = [...nodes].sort((a, b) => {
     let cmp = 0;
@@ -24,8 +28,6 @@ export function sortNodes(nodes: RouteNode[], opts: SortOptions): RouteNode[] {
       const db = b.path.split('/').length;
       cmp = da - db;
     } else if (opts.key === 'type') {
-      const typeRank = (n: RouteNode) =>
-        n.isLayout ? 0 : n.isPage ? 1 : 2;
       cmp = typeRank(a) - typeRank(b);
     }
     return opts.order === 'desc' ? -cmp : cmp;
