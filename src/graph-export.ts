@@ -33,7 +33,9 @@ export function exportAsMermaid(graph: RouteGraph): string {
 export function exportAsCsv(graph: RouteGraph): string {
   const lines = ['from,to,type'];
   for (const edge of graph.edges) {
-    lines.push(`${edge.from},${edge.to},${edge.type}`);
+    // Wrap fields in quotes if they contain commas to produce valid CSV
+    const escape = (s: string) => (s.includes(',') ? `"${s.replace(/"/g, '""')}"` : s);
+    lines.push(`${escape(edge.from)},${escape(edge.to)},${escape(edge.type)}`);
   }
   return lines.join('\n');
 }
