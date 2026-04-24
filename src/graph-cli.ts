@@ -30,6 +30,9 @@ export function parseGraphFlags(args: string[]): GraphFlags {
       const fmt = args[++i];
       if (fmt === 'json' || fmt === 'adjacency' || fmt === 'text') {
         flags.format = fmt;
+      } else {
+        console.error(`Unknown format "${fmt}". Valid options: text, json, adjacency.`);
+        process.exit(1);
       }
     }
   }
@@ -45,7 +48,15 @@ export function runGraphCli(args: string[]): void {
     return;
   }
 
-  const scanned = scanAppRouter(flags.dir);
+  let scanned;
+  try {
+    scanned = scanAppRouter(flags.dir);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Failed to scan directory "${flags.dir}": ${message}`);
+    process.exit(1);
+  }
+
   const tree = buildTree(scanned);
   const graph = buildGraph(tree);
 
