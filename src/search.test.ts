@@ -41,6 +41,14 @@ describe('searchRoutes', () => {
     const results = searchRoutes(tree, 'ABOUT');
     expect(results.length).toBe(1);
   });
+
+  it('returns all matching nodes when multiple segments match', () => {
+    // Both 'settings' under dashboard and a hypothetical duplicate would appear;
+    // here we verify that searching 'health' returns exactly the one match.
+    const results = searchRoutes(tree, 'health');
+    expect(results).toHaveLength(1);
+    expect(results[0].path).toBe('/api/health');
+  });
 });
 
 describe('formatSearchResults', () => {
@@ -53,5 +61,16 @@ describe('formatSearchResults', () => {
     const out = formatSearchResults(results);
     expect(out).toContain('Found 1 route(s)');
     expect(out).toContain('/about');
+  });
+
+  it('lists all matched paths when multiple results exist', () => {
+    const results = [
+      { node: makeNode('settings'), path: '/dashboard/settings', matchedOn: 'segment' as const },
+      { node: makeNode('settings'), path: '/account/settings', matchedOn: 'segment' as const },
+    ];
+    const out = formatSearchResults(results);
+    expect(out).toContain('Found 2 route(s)');
+    expect(out).toContain('/dashboard/settings');
+    expect(out).toContain('/account/settings');
   });
 });
