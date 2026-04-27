@@ -44,6 +44,11 @@ describe("classifyPattern", () => {
   it("classifies intercepted routes", () => {
     expect(classifyPattern("(..)photo")).toBe("intercepted");
   });
+
+  it("classifies root segment as static", () => {
+    expect(classifyPattern("app")).toBe("static");
+    expect(classifyPattern("index")).toBe("static");
+  });
 });
 
 describe("buildPatternReport", () => {
@@ -70,6 +75,13 @@ describe("buildPatternReport", () => {
     expect(report.counts["dynamic"]).toBe(0);
     expect(report.counts["intercepted"]).toBe(0);
   });
+
+  it("handles a tree with no children (single root node)", () => {
+    const root = makeNode("app");
+    const report = buildPatternReport(root);
+    expect(report.total).toBe(1);
+    expect(report.counts["static"]).toBe(1);
+  });
 });
 
 describe("formatPatternReport", () => {
@@ -86,5 +98,12 @@ describe("formatPatternReport", () => {
     const report = buildPatternReport(root);
     const output = formatPatternReport(report);
     expect(output).not.toContain("dynamic");
+  });
+
+  it("includes dynamic in output when dynamic segments are present", () => {
+    const root = makeNode("app", [makeNode("[id]")]);
+    const report = buildPatternReport(root);
+    const output = formatPatternReport(report);
+    expect(output).toContain("dynamic");
   });
 });
